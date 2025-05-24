@@ -49,3 +49,17 @@ install dependencies
 ```
 make install
 ```
+
+#### Tests
+
+run all tests
+
+```
+make test
+```
+
+run unit tests
+
+```
+make unit
+``` 
