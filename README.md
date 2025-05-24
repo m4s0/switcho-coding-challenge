@@ -55,3 +55,9 @@ run Coding Standards checks
 ```bash
 make cs
 ``` 
+
+run Static Code Analysis
+
+```bash
+make stan
+``` 
