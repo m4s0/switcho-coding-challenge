@@ -41,3 +41,11 @@ Enter into php container
 ```
 make bash
 ```
+
+#### Init Application
+
+install dependencies
+
+```
+make install
+```
