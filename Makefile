@@ -38,3 +38,7 @@ test:
 .PHONY: unit
 unit:
 	cd docker && docker-compose run --rm php-fpm sh -c 'composer test:unit'
+
+.PHONY: cs
+cs:
+	cd docker && docker-compose run --rm php-fpm sh -c 'vendor/bin/php-cs-fixer fix --no-interaction --diff --verbose'

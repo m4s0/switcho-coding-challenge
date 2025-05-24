@@ -63,3 +63,9 @@ run unit tests
 ```
 make unit
 ``` 
+
+#### Coding Standards
+
+```
+make cs
+``` 
