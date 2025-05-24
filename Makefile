@@ -11,3 +11,7 @@ install:
 .PHONY: test
 test:
 	cd docker && docker-compose run --rm php-fpm sh -c 'vendor/bin/phpunit --testdox --colors=always'
+
+.PHONY: cs
+cs:
+	cd docker && docker-compose run --rm php-fpm sh -c 'vendor/bin/php-cs-fixer fix --no-interaction --diff --verbose'

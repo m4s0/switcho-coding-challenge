@@ -40,12 +40,18 @@ make bash
 
 install dependencies
 
-```
+```bash
 make install
 ```
 
 run all tests
 
-```
+```bash
 make test
 ```
+
+run Coding Standards checks
+
+```bash
+make cs
+``` 
