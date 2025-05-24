@@ -1,0 +1,55 @@
+name: "php-nginx-postgres"
+
+services:
+  db:
+    image: postgres:17.4
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_HOST=${DB_HOST}
+      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - ${PGSQL_EXPOSED_PORT}:5432
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./docker/db/scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD-SHELL", "runuser", "-u", "postgres", "--", "pg_isready" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+  php-fpm:
+    container_name: php-fpm
+    build:
+      context: ./docker/php-fpm
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./app:/var/app
+
+  nginx:
+    container_name: nginx
+    build:
+      context: ./docker/nginx
+    volumes:
+      - ./app:/var/app
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/sites/:/etc/nginx/sites-available
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d
+    depends_on:
+      - php-fpm
+    ports:
+      - "80:80"
+      - "443:443"
+
+volumes:
+  db-data:
+    name: ${DB_VOLUME_NAME}
