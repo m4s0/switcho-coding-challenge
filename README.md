@@ -37,3 +37,9 @@ Enter into php container
 ```bash
 make bash
 ```
+
+install dependencies
+
+```
+make install
+```
