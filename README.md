@@ -69,3 +69,9 @@ make unit
 ```
 make cs
 ``` 
+
+#### Static Code Analysis
+
+```
+make stan
+``` 

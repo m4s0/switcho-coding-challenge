@@ -42,3 +42,7 @@ unit:
 .PHONY: cs
 cs:
 	cd docker && docker-compose run --rm php-fpm sh -c 'vendor/bin/php-cs-fixer fix --no-interaction --diff --verbose'
+
+.PHONY: stan
+stan:
+	cd docker && docker-compose run --rm php-fpm sh -c 'vendor/bin/phpstan analyse --memory-limit=-1'
