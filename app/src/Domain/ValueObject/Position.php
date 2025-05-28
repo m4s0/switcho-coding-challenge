@@ -11,14 +11,14 @@ final readonly class Position
         public int $col,
     ) {
         if ($row < 0 || $row > 2 || $col < 0 || $col > 2) {
-            throw new \InvalidArgumentException('Position must be between 0 and 2');
+            throw new \DomainException('Position must be between 0 and 2');
         }
     }
 
     public static function fromIndex(int $index): self
     {
         if ($index < 0 || $index > 8) {
-            throw new \InvalidArgumentException('Index must be between 0 and 8');
+            throw new \DomainException('Index must be between 0 and 8');
         }
 
         return new self(row: intdiv($index, 3), col: $index % 3);

@@ -65,10 +65,6 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
-        "test": [
-            "@test:unit"
-        ],
-        "test:unit": "vendor/bin/phpunit --testdox --exclude-group=none --colors=always"
     },
     "conflict": {
         "symfony/symfony": "*"

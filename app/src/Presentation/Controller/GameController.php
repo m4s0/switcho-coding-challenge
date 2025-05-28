@@ -45,12 +45,17 @@ final class GameController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
             if (!isset($data['player'], $data['row'], $data['col'])) {
-                return $this->json([
-                    'error' => 'Missing required fields: player, row, col',
-                ], Response::HTTP_BAD_REQUEST);
+                return $this->json(
+                    ['error' => 'Missing required fields: player, row, col'],
+                    Response::HTTP_BAD_REQUEST);
             }
-            $game = $this->makeMoveUseCase->execute($gameId, (int) $data['player'], (int) $data['row'],
-                (int) $data['col']);
+
+            $game = $this->makeMoveUseCase->execute(
+                $gameId,
+                (int) $data['player'],
+                (int) $data['row'],
+                (int) $data['col']
+            );
             $gameState = GameStateDTO::fromGame($game);
 
             return $this->json($gameState, Response::HTTP_CREATED);

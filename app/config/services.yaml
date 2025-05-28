@@ -2,12 +2,15 @@ services:
     _defaults:
         autowire: true
         autoconfigure: true
+        public: true
 
     App\:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Infrastructure/Persistence/Entity/'
+            - '../src/Application/DTO/'
+            - '../src/Domain/'
             - '../src/Kernel.php'
 
     # Repository binding
