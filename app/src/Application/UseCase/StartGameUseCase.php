@@ -6,8 +6,9 @@ namespace App\Application\UseCase;
 
 use App\Domain\Entity\Game;
 use App\Domain\Repository\GameRepositoryInterface;
+use App\Domain\ValueObject\GameId;
 
-class StartGameUseCase
+final readonly class StartGameUseCase
 {
     public function __construct(
         private GameRepositoryInterface $gameRepository,
@@ -16,7 +17,7 @@ class StartGameUseCase
 
     public function execute(): Game
     {
-        $game = new Game();
+        $game = new Game(GameId::generate());
         $this->gameRepository->save($game);
 
         return $game;

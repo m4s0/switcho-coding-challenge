@@ -6,81 +6,89 @@ namespace App\Infrastructure\Persistence\Repository;
 
 use App\Domain\Entity\Game;
 use App\Domain\Repository\GameRepositoryInterface;
+use App\Domain\ValueObject\Board;
 use App\Domain\ValueObject\GameId;
+use App\Domain\ValueObject\PlayerId;
 use App\Infrastructure\Persistence\Entity\GameEntity;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
 
-class DoctrineGameRepository extends ServiceEntityRepository implements GameRepositoryInterface
+final readonly class DoctrineGameRepository implements GameRepositoryInterface
 {
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, GameEntity::class);
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+    ) {
     }
 
     public function save(Game $game): void
     {
-        $entity = $this->toEntity($game);
-
-        $this->getEntityManager()->persist($entity);
-        $this->getEntityManager()->flush();
-
-        if (null === $game->getId()->getValue()) {
-            $game->setId(new GameId($entity->getId()));
+        $gameEntity = $this->entityManager->find(GameEntity::class, $game->getId()->toString());
+        if ($gameEntity instanceof GameEntity) {
+            $gameEntity->updateFromDomain(
+                board: $this->serializeBoard($game->getBoard()),
+                currentPlayer: $game->getCurrentPlayer()->value,
+                isFinished: $game->isFinished(),
+                winner: $game->getWinner()?->value,
+                updatedAt: $game->getUpdatedAt()
+            );
+        } else {
+            $gameEntity = new GameEntity(
+                id: $game->getId()->toString(),
+                board: $this->serializeBoard($game->getBoard()),
+                currentPlayer: $game->getCurrentPlayer()->value,
+                isFinished: $game->isFinished(),
+                winner: $game->getWinner()?->value,
+                createdAt: $game->getCreatedAt(),
+                updatedAt: $game->getUpdatedAt()
+            );
+            $this->entityManager->persist($gameEntity);
         }
+        $this->entityManager->flush();
     }
 
-    public function findById(GameId $gameId): ?Game
+    public function findById(GameId $id): ?Game
     {
-        $entity = $this->find($gameId->getValue());
-
-        if (!$entity) {
+        $gameEntity = $this->entityManager->find(GameEntity::class, $id->toString());
+        if (!$gameEntity instanceof GameEntity) {
             return null;
         }
 
-        return $this->toDomain($entity);
+        return $this->toDomainEntity($gameEntity);
     }
 
-    public function remove(Game $game): void
+    public function delete(GameId $id): void
     {
-        $entity = $this->find($game->getId()->getValue());
-
-        if ($entity) {
-            $this->getEntityManager()->remove($entity);
-            $this->getEntityManager()->flush();
+        $gameEntity = $this->entityManager->find(GameEntity::class, $id->toString());
+        if ($gameEntity instanceof GameEntity) {
+            $this->entityManager->remove($gameEntity);
+            $this->entityManager->flush();
         }
     }
 
-    private function toEntity(Game $game): GameEntity
+    private function toDomainEntity(GameEntity $gameEntity): Game
     {
-        $entityId = $game->getId()->getValue();
-        $entity = $entityId ? $this->find($entityId) : null;
+        $board = $this->deserializeBoard($gameEntity->getBoard());
 
-        if (!$entity) {
-            $entity = new GameEntity();
-        }
-
-        $entity->setBoard($game->getBoard()->toArray())
-               ->setCurrentPlayer($game->getCurrentPlayer()->getValue())
-               ->setIsFinished($game->isFinished())
-               ->setWinner($game->getWinner()?->getValue())
-               ->setCreatedAt($game->getCreatedAt());
-
-        return $entity;
-    }
-
-    private function toDomain(GameEntity $entity): Game
-    {
-        $game = new Game(new GameId($entity->getId()));
-
-        $game->restoreState(
-            $entity->getBoard(),
-            $entity->getCurrentPlayer(),
-            $entity->isFinished(),
-            $entity->getWinner(),
-            $entity->getCreatedAt()
+        $game = new Game(GameId::fromString($gameEntity->getId()), $board);
+        $game->reconstituteState(
+            currentPlayer: PlayerId::from($gameEntity->getCurrentPlayer()),
+            isFinished: $gameEntity->isFinished(),
+            winner: null !== $gameEntity->getWinner() ? PlayerId::from($gameEntity->getWinner()) : null,
+            createdAt: $gameEntity->getCreatedAt(),
+            updatedAt: $gameEntity->getUpdatedAt()
         );
 
         return $game;
+    }
+
+    private function serializeBoard(Board $board): array
+    {
+        return array_map(static fn (?PlayerId $playerId): ?int => $playerId?->value, $board->getRawCells());
+    }
+
+    private function deserializeBoard(array $data): Board
+    {
+        $cells = array_map(static fn (?int $playerId): ?PlayerId => null !== $playerId ? PlayerId::from($playerId) : null, $data);
+
+        return new Board($cells);
     }
 }

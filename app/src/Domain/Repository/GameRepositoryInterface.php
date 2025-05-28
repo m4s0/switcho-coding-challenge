@@ -11,7 +11,7 @@ interface GameRepositoryInterface
 {
     public function save(Game $game): void;
 
-    public function findById(GameId $gameId): ?Game;
+    public function findById(GameId $id): ?Game;
 
-    public function remove(Game $game): void;
+    public function delete(GameId $id): void;
 }

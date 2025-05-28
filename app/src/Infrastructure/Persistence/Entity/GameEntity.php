@@ -10,34 +10,28 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DoctrineGameRepository::class)]
 #[ORM\Table(name: 'games')]
-class GameEntity
+final class GameEntity
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
-    #[ORM\Column(type: Types::JSON)]
-    private array $board = [];
-
-    #[ORM\Column]
-    private int $currentPlayer = 1;
-
-    #[ORM\Column]
-    private bool $isFinished = false;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $winner = null;
-
-    #[ORM\Column]
-    private \DateTimeImmutable $createdAt;
-
-    public function __construct()
-    {
-        $this->createdAt = new \DateTimeImmutable();
+    public function __construct(
+        #[ORM\Id]
+        #[ORM\Column(type: Types::GUID, unique: true)]
+        private readonly string $id,
+        #[ORM\Column(type: Types::JSON)]
+        private array $board,
+        #[ORM\Column(type: Types::INTEGER)]
+        private int $currentPlayer,
+        #[ORM\Column(type: Types::BOOLEAN)]
+        private bool $isFinished,
+        #[ORM\Column(type: Types::INTEGER, nullable: true)]
+        private ?int $winner,
+        #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+        private readonly \DateTimeImmutable $createdAt,
+        #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+        private \DateTimeImmutable $updatedAt,
+    ) {
     }
 
-    public function getId(): ?int
+    public function getId(): string
     {
         return $this->id;
     }
@@ -47,23 +41,9 @@ class GameEntity
         return $this->board;
     }
 
-    public function setBoard(array $board): self
-    {
-        $this->board = $board;
-
-        return $this;
-    }
-
     public function getCurrentPlayer(): int
     {
         return $this->currentPlayer;
-    }
-
-    public function setCurrentPlayer(int $currentPlayer): self
-    {
-        $this->currentPlayer = $currentPlayer;
-
-        return $this;
     }
 
     public function isFinished(): bool
@@ -71,23 +51,9 @@ class GameEntity
         return $this->isFinished;
     }
 
-    public function setIsFinished(bool $isFinished): self
-    {
-        $this->isFinished = $isFinished;
-
-        return $this;
-    }
-
     public function getWinner(): ?int
     {
         return $this->winner;
-    }
-
-    public function setWinner(?int $winner): self
-    {
-        $this->winner = $winner;
-
-        return $this;
     }
 
     public function getCreatedAt(): \DateTimeImmutable
@@ -95,10 +61,22 @@ class GameEntity
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
+    public function getUpdatedAt(): \DateTimeImmutable
     {
-        $this->createdAt = $createdAt;
+        return $this->updatedAt;
+    }
 
-        return $this;
+    public function updateFromDomain(
+        array $board,
+        int $currentPlayer,
+        bool $isFinished,
+        ?int $winner,
+        \DateTimeImmutable $updatedAt,
+    ): void {
+        $this->board = $board;
+        $this->currentPlayer = $currentPlayer;
+        $this->isFinished = $isFinished;
+        $this->winner = $winner;
+        $this->updatedAt = $updatedAt;
     }
 }

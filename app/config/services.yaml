@@ -7,22 +7,21 @@ services:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
-            - '../src/Entity/'
+            - '../src/Infrastructure/Persistence/Entity/'
             - '../src/Kernel.php'
 
-    # Domain Repository Interface Binding
+    # Repository binding
     App\Domain\Repository\GameRepositoryInterface:
-        alias: App\Infrastructure\Persistence\Repository\DoctrineGameRepository
+        class: App\Infrastructure\Persistence\Repository\DoctrineGameRepository
 
-    # Use Cases
-    App\Application\UseCase\StartGameUseCase:
-        arguments:
-            $gameRepository: '@App\Domain\Repository\GameRepositoryInterface'
+    # Use cases
+    App\Application\UseCase\StartGameUseCase: ~
+    App\Application\UseCase\MakeMoveUseCase: ~
+    App\Application\UseCase\GetGameStatusUseCase: ~
 
-    App\Application\UseCase\MakeMoveUseCase:
+    # Controller
+    App\Presentation\Controller\GameController:
         arguments:
-            $gameRepository: '@App\Domain\Repository\GameRepositoryInterface'
-
-    App\Application\UseCase\GetGameStatusUseCase:
-        arguments:
-            $gameRepository: '@App\Domain\Repository\GameRepositoryInterface'
+            $startGameUseCase: '@App\Application\UseCase\StartGameUseCase'
+            $makeMoveUseCase: '@App\Application\UseCase\MakeMoveUseCase'
+            $getGameStatusUseCase: '@App\Application\UseCase\GetGameStatusUseCase'

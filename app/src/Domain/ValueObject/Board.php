@@ -8,37 +8,23 @@ final class Board
 {
     private array $cells;
 
-    public function __construct(array $cells = [])
+    public function __construct(?array $cells = null)
     {
-        $this->cells = $cells ?: array_fill(0, 9, null);
+        $this->cells = $cells ?? array_fill(0, 9, null);
+    }
 
-        if (9 !== count($this->cells)) {
-            throw new \InvalidArgumentException('Board must have exactly 9 cells');
+    public function makeMove(Position $position, PlayerId $playerId): void
+    {
+        $index = $position->toIndex();
+        if (null !== $this->cells[$index]) {
+            throw new \DomainException('Position is already occupied');
         }
+        $this->cells[$index] = $playerId;
     }
 
-    public function makeMove(Position $position, PlayerId $playerId): self
+    public function isPositionEmpty(Position $position): bool
     {
-        if ($this->isPositionTaken($position)) {
-            throw new \DomainException('Position is already taken');
-        }
-
-        $newCells = $this->cells;
-        $newCells[$position->getValue()] = $playerId->getValue();
-
-        return new self($newCells);
-    }
-
-    public function isPositionTaken(Position $position): bool
-    {
-        return null !== $this->cells[$position->getValue()];
-    }
-
-    public function getPlayerAt(Position $position): ?PlayerId
-    {
-        $value = $this->cells[$position->getValue()];
-
-        return $value ? new PlayerId($value) : null;
+        return null === $this->cells[$position->toIndex()];
     }
 
     public function isFull(): bool
@@ -46,43 +32,39 @@ final class Board
         return !in_array(null, $this->cells, true);
     }
 
-    public function isEmpty(): bool
+    public function hasWinner(): bool
     {
-        return [] === array_filter($this->cells);
+        return null !== $this->getWinner();
     }
 
     public function getWinner(): ?PlayerId
     {
         $winningCombinations = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-            [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-            [0, 4, 8], [2, 4, 6],             // diagonals
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8], // Rows
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8], // Columns
+            [0, 4, 8],
+            [2, 4, 6],             // Diagonals
         ];
-
-        foreach ($winningCombinations as $combination) {
-            [$a, $b, $c] = $combination;
-
-            if (null !== $this->cells[$a]
-                && $this->cells[$a] === $this->cells[$b]
-                && $this->cells[$b] === $this->cells[$c]) {
-                return new PlayerId($this->cells[$a]);
+        foreach ($winningCombinations as [$a, $b, $c]) {
+            if (null !== $this->cells[$a] && $this->cells[$a] === $this->cells[$b] && $this->cells[$b] === $this->cells[$c]) {
+                return $this->cells[$a];
             }
         }
 
         return null;
     }
 
-    public function toArray(): array
+    public function getCells(): array
     {
-        return $this->cells;
+        return array_map(static fn (?PlayerId $playerId): ?string => $playerId?->getSymbol(), $this->cells);
     }
 
-    public function to2DArray(): array
+    public function getRawCells(): array
     {
-        return [
-            [$this->cells[0], $this->cells[1], $this->cells[2]],
-            [$this->cells[3], $this->cells[4], $this->cells[5]],
-            [$this->cells[6], $this->cells[7], $this->cells[8]],
-        ];
+        return $this->cells;
     }
 }

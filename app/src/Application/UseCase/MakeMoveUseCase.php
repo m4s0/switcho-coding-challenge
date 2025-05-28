@@ -4,30 +4,31 @@ declare(strict_types=1);
 
 namespace App\Application\UseCase;
 
-use App\Application\DTO\GameStateDTO;
+use App\Domain\Entity\Game;
 use App\Domain\Repository\GameRepositoryInterface;
 use App\Domain\ValueObject\GameId;
 use App\Domain\ValueObject\PlayerId;
 use App\Domain\ValueObject\Position;
 
-class MakeMoveUseCase
+final readonly class MakeMoveUseCase
 {
     public function __construct(
         private GameRepositoryInterface $gameRepository,
     ) {
     }
 
-    public function execute(int $gameId, int $playerId, int $position): GameStateDTO
+    public function execute(string $gameId, int $playerId, int $row, int $col): Game
     {
-        $game = $this->gameRepository->findById(new GameId($gameId));
-
-        if (!$game) {
-            throw new \DomainException('Game not found');
+        $game = $this->gameRepository->findById(GameId::fromString($gameId));
+        if (null === $game) {
+            throw new \InvalidArgumentException('Game not found');
         }
 
-        $game->makeMove(new PlayerId($playerId), new Position($position));
+        $player = PlayerId::from($playerId);
+        $movePosition = new Position($row, $col);
+        $game->makeMove($player, $movePosition);
         $this->gameRepository->save($game);
 
-        return GameStateDTO::fromGame($game);
+        return $game;
     }
 }

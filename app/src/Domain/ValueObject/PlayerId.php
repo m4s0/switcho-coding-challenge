@@ -4,32 +4,24 @@ declare(strict_types=1);
 
 namespace App\Domain\ValueObject;
 
-final readonly class PlayerId
+enum PlayerId: int
 {
-    public function __construct(private int $value)
+    case PLAYER_ONE = 1;
+    case PLAYER_TWO = 2;
+
+    public function getSymbol(): string
     {
-        if (!in_array($value, [1, 2], true)) {
-            throw new \InvalidArgumentException('Player ID must be 1 or 2');
-        }
+        return match ($this) {
+            self::PLAYER_ONE => 'X',
+            self::PLAYER_TWO => 'O',
+        };
     }
 
-    public function getValue(): int
+    public function getOpponent(): self
     {
-        return $this->value;
-    }
-
-    public function equals(PlayerId $other): bool
-    {
-        return $this->value === $other->value;
-    }
-
-    public function getOpponent(): PlayerId
-    {
-        return new self(1 === $this->value ? 2 : 1);
-    }
-
-    public function __toString(): string
-    {
-        return (string) $this->value;
+        return match ($this) {
+            self::PLAYER_ONE => self::PLAYER_TWO,
+            self::PLAYER_TWO => self::PLAYER_ONE,
+        };
     }
 }

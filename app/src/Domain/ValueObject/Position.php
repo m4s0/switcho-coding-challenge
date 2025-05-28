@@ -6,38 +6,31 @@ namespace App\Domain\ValueObject;
 
 final readonly class Position
 {
-    public function __construct(private int $value)
-    {
-        if ($value < 0 || $value > 8) {
-            throw new \InvalidArgumentException('Position must be between 0 and 8');
+    public function __construct(
+        public int $row,
+        public int $col,
+    ) {
+        if ($row < 0 || $row > 2 || $col < 0 || $col > 2) {
+            throw new \InvalidArgumentException('Position must be between 0 and 2');
         }
     }
 
-    public function getValue(): int
+    public static function fromIndex(int $index): self
     {
-        return $this->value;
+        if ($index < 0 || $index > 8) {
+            throw new \InvalidArgumentException('Index must be between 0 and 8');
+        }
+
+        return new self(row: intdiv($index, 3), col: $index % 3);
     }
 
-    public function equals(Position $other): bool
+    public function toIndex(): int
     {
-        return $this->value === $other->value;
+        return $this->row * 3 + $this->col;
     }
 
-    public function toRowCol(): array
+    public function equals(self $other): bool
     {
-        return [
-            'row' => intdiv($this->value, 3),
-            'col' => $this->value % 3,
-        ];
-    }
-
-    public static function fromRowCol(int $row, int $col): self
-    {
-        return new self($row * 3 + $col);
-    }
-
-    public function __toString(): string
-    {
-        return (string) $this->value;
+        return $this->row === $other->row && $this->col === $other->col;
     }
 }
