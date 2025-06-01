@@ -33,11 +33,15 @@ install:
 
 .PHONY: test
 test:
-	cd docker && docker-compose run --rm php-fpm sh -c 'composer test'
+	cd docker && docker-compose run --rm php-fpm sh -c 'vendor/bin/phpunit --testdox --colors=always'
 
 .PHONY: unit
 unit:
-	cd docker && docker-compose run --rm php-fpm sh -c 'composer test:unit'
+	cd docker && docker-compose run --rm php-fpm sh -c 'vendor/bin/phpunit --testdox --group=Unit --colors=always'
+
+.PHONY: integration
+integration:
+	cd docker && docker-compose run --rm php-fpm sh -c 'vendor/bin/phpunit --testdox --group=Integration --colors=always'
 
 .PHONY: cs
 cs:

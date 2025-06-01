@@ -64,6 +64,12 @@ run unit tests
 make unit
 ``` 
 
+run integration tests
+
+```
+make integration
+``` 
+
 #### Coding Standards
 
 ```
