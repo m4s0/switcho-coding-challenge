@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Entity;
 
-use App\Domain\ValueObject\PlayerId;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -13,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 class GameEntity
 {
     /**
-     * @param array<PlayerId|null> $board
+     * @param array<int|null> $board
      */
     public function __construct(
         #[ORM\Id]
@@ -40,7 +39,7 @@ class GameEntity
     }
 
     /**
-     * @return array<PlayerId|null>
+     * @return array<int|null>
      */
     public function getBoard(): array
     {
@@ -73,7 +72,7 @@ class GameEntity
     }
 
     /**
-     * @param array<PlayerId> $board
+     * @param array<int> $board
      */
     public function updateFromDomain(
         array $board,

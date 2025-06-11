@@ -19,6 +19,10 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Infrastructure/Persistence/Entity'
                 prefix: 'App\Infrastructure\Persistence\Entity'
                 alias: App
+when@test:
+    doctrine:
+        dbal:
+            url: '%env(resolve:DATABASE_URL_TEST)%'
 
 when@prod:
     doctrine:

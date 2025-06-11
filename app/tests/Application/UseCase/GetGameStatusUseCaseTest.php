@@ -36,7 +36,7 @@ class GetGameStatusUseCaseTest extends KernelTestCase
         $gameId = GameId::generate();
         $gameEntity = new GameEntity(
             $gameId->toString(),
-            board: Board::createEmpty()->getRawCells(),
+            board: Board::createEmpty()->getCells(),
             currentPlayer: PlayerId::PLAYER_ONE->value,
             isFinished: false,
             winner: null,

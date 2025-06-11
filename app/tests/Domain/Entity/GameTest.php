@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Domain\Entity;
 
 use App\Domain\Entity\Game;
+use App\Domain\Exception\DomainException;
 use App\Domain\ValueObject\GameId;
 use App\Domain\ValueObject\PlayerId;
 use App\Domain\ValueObject\Position;
@@ -45,7 +46,7 @@ class GameTest extends TestCase
 
     public function testThrowsExceptionWhenMakingMoveOnFinishedGame(): void
     {
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Game is already finished');
 
         $this->game->makeMove(PlayerId::PLAYER_ONE, Position::create(0, 0));
@@ -59,7 +60,7 @@ class GameTest extends TestCase
 
     public function testThrowsExceptionWhenMakingMoveOutOfTurn(): void
     {
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('It is not your turn');
 
         $this->game->makeMove(PlayerId::PLAYER_TWO, Position::create(0, 0));
@@ -67,7 +68,7 @@ class GameTest extends TestCase
 
     public function testThrowsExceptionWhenMakingMoveOnOccupiedPosition(): void
     {
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Position is already occupied');
 
         $position = Position::create(0, 0);

@@ -6,6 +6,7 @@ namespace App\Tests\Application\UseCase;
 
 use App\Application\UseCase\MakeMoveUseCase;
 use App\Domain\Entity\Game;
+use App\Domain\Exception\NotFoundException;
 use App\Domain\ValueObject\Board;
 use App\Domain\ValueObject\GameId;
 use App\Domain\ValueObject\PlayerId;
@@ -37,7 +38,7 @@ class MakeMoveUseCaseTest extends KernelTestCase
         $gameId = GameId::generate();
         $gameEntity = new GameEntity(
             $gameId->toString(),
-            board: Board::createEmpty()->getRawCells(),
+            board: Board::createEmpty()->getCells(),
             currentPlayer: PlayerId::PLAYER_ONE->value,
             isFinished: false,
             winner: null,
@@ -67,7 +68,7 @@ class MakeMoveUseCaseTest extends KernelTestCase
     {
         $gameId = GameId::fromString('123e4567-e89b-12d3-a456-426614174001');
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Game not found');
 
         $this->makeMoveUseCase->execute(

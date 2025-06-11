@@ -8,6 +8,9 @@ use App\Application\DTO\GameStateDTO;
 use App\Application\UseCase\GetGameStatusUseCase;
 use App\Application\UseCase\MakeMoveUseCase;
 use App\Application\UseCase\StartGameUseCase;
+use App\Domain\Exception\DomainException;
+use App\Domain\Exception\NotFoundException;
+use App\Domain\Service\MinimaxStrategy;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +24,7 @@ class GameController extends AbstractController
         private readonly StartGameUseCase $startGameUseCase,
         private readonly MakeMoveUseCase $makeMoveUseCase,
         private readonly GetGameStatusUseCase $getGameStatusUseCase,
+        private readonly MinimaxStrategy $minimaxStrategy,
     ) {
     }
 
@@ -44,10 +48,12 @@ class GameController extends AbstractController
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
             if (!isset($data['player'], $data['row'], $data['col'])) {
                 return $this->json(
                     ['error' => 'Missing required fields: player, row, col'],
-                    Response::HTTP_BAD_REQUEST);
+                    Response::HTTP_BAD_REQUEST
+                );
             }
 
             $game = $this->makeMoveUseCase->execute(
@@ -56,14 +62,18 @@ class GameController extends AbstractController
                 (int) $data['row'],
                 (int) $data['col']
             );
-            $gameState = GameStateDTO::fromGame($game);
+
+            $opponentWinningMoves = $this->minimaxStrategy->findOpponentWinningMoves($game->getBoard(), $game->getCurrentPlayer());
+            $bestMove = $this->minimaxStrategy->findBestMove($game->getBoard(), $game->getCurrentPlayer());
+
+            $gameState = GameStateDTO::fromGame($game, $opponentWinningMoves, $bestMove);
 
             return $this->json($gameState, Response::HTTP_CREATED);
-        } catch (\InvalidArgumentException $e) {
+        } catch (NotFoundException $e) {
             return $this->json([
                 'error' => $e->getMessage(),
             ], Response::HTTP_NOT_FOUND);
-        } catch (\DomainException $e) {
+        } catch (DomainException $e) {
             return $this->json([
                 'error' => $e->getMessage(),
             ], Response::HTTP_BAD_REQUEST);

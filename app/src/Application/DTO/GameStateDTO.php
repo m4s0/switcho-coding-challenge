@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Application\DTO;
 
 use App\Domain\Entity\Game;
+use App\Domain\ValueObject\Position;
 
 readonly class GameStateDTO
 {
     /**
-     * @param array<int|null> $board
+     * @param array<int|null>      $board
+     * @param array<Position>|null $opponentWinningMoves
      */
     public function __construct(
         public string $gameId,
@@ -21,11 +23,19 @@ readonly class GameStateDTO
         public bool $isDraw,
         public string $createdAt,
         public string $updatedAt,
+        public ?array $opponentWinningMoves,
+        public ?Position $bestMove,
     ) {
     }
 
-    public static function fromGame(Game $game): self
-    {
+    /**
+     * @param array<Position>|null $opponentWinningMoves
+     */
+    public static function fromGame(
+        Game $game,
+        ?array $opponentWinningMoves = null,
+        ?Position $bestMove = null,
+    ): self {
         return new self(
             gameId: $game->getId()->toString(),
             board: $game->getBoard()->getCells(),
@@ -35,6 +45,9 @@ readonly class GameStateDTO
             currentPlayer: $game->getCurrentPlayer()->value,
             isDraw: $game->isDraw(),
             createdAt: $game->getCreatedAt()->format('Y-m-d H:i:s'),
-            updatedAt: $game->getUpdatedAt()->format('Y-m-d H:i:s'));
+            updatedAt: $game->getUpdatedAt()->format('Y-m-d H:i:s'),
+            opponentWinningMoves: $opponentWinningMoves,
+            bestMove: $bestMove
+        );
     }
 }

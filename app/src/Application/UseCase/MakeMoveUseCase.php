@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\UseCase;
 
 use App\Domain\Entity\Game;
+use App\Domain\Exception\NotFoundException;
 use App\Domain\Repository\GameRepositoryInterface;
 use App\Domain\ValueObject\GameId;
 use App\Domain\ValueObject\PlayerId;
@@ -21,7 +22,7 @@ readonly class MakeMoveUseCase
     {
         $game = $this->gameRepository->findById(GameId::fromString($gameId));
         if (null === $game) {
-            throw new \InvalidArgumentException('Game not found');
+            throw new NotFoundException('Game not found');
         }
 
         $player = PlayerId::from($playerId);

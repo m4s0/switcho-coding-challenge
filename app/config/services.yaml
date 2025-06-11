@@ -17,6 +17,9 @@ services:
     App\Domain\Repository\GameRepositoryInterface:
         class: App\Infrastructure\Persistence\Repository\DoctrineGameRepository
 
+    # Services
+    App\Domain\Service\MinimaxStrategy: ~
+
     # Use cases
     App\Application\UseCase\StartGameUseCase: ~
     App\Application\UseCase\MakeMoveUseCase: ~
@@ -28,3 +31,4 @@ services:
             $startGameUseCase: '@App\Application\UseCase\StartGameUseCase'
             $makeMoveUseCase: '@App\Application\UseCase\MakeMoveUseCase'
             $getGameStatusUseCase: '@App\Application\UseCase\GetGameStatusUseCase'
+            $minimaxStrategy: '@App\Domain\Service\MinimaxStrategy'

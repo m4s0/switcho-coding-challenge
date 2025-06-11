@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Domain\ValueObject;
+namespace App\Tests\Domain\ValueObject;
 
 use App\Domain\ValueObject\PlayerId;
 use PHPUnit\Framework\TestCase;

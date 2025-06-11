@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Domain\ValueObject;
 
+use App\Domain\Exception\DomainException;
 use App\Domain\ValueObject\Board;
 use App\Domain\ValueObject\PlayerId;
 use App\Domain\ValueObject\Position;
@@ -41,7 +42,7 @@ class BoardTest extends TestCase
         $position = Position::create(0, 0);
         $this->board->makeMove($position, PlayerId::PLAYER_ONE);
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Position is already occupied');
 
         $this->board->makeMove($position, PlayerId::PLAYER_TWO);
@@ -81,7 +82,7 @@ class BoardTest extends TestCase
 
     public function testThrowsExceptionWhenMakingMoveOnOccupiedPosition(): void
     {
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Position is already occupied');
 
         $position = Position::create(0, 0);
@@ -111,7 +112,7 @@ class BoardTest extends TestCase
 
     public function testThrowsExceptionForInvalidPosition(): void
     {
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Position is out of bounds');
 
         $this->board->getCellOccupant(Position::create(2, 2));
@@ -126,11 +127,11 @@ class BoardTest extends TestCase
         $serialized = Board::serialize($board);
 
         $expected = [
-            PlayerId::PLAYER_ONE,
+            PlayerId::PLAYER_ONE->value,
             null,
             null,
             null,
-            PlayerId::PLAYER_TWO,
+            PlayerId::PLAYER_TWO->value,
             null,
             null,
             null,
@@ -143,11 +144,11 @@ class BoardTest extends TestCase
     public function testDeserialize(): void
     {
         $data = [
-            PlayerId::PLAYER_ONE,
+            PlayerId::PLAYER_ONE->value,
             null,
             null,
             null,
-            PlayerId::PLAYER_TWO,
+            PlayerId::PLAYER_TWO->value,
             null,
             null,
             null,

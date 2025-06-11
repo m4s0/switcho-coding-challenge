@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Entity;
 
+use App\Domain\Exception\DomainException;
 use App\Domain\ValueObject\Board;
 use App\Domain\ValueObject\GameId;
 use App\Domain\ValueObject\PlayerId;
@@ -25,36 +26,43 @@ class Game
 
     private function __construct(
         private readonly GameId $id,
-        ?Board $board = null,
-        ?PlayerId $currentPlayer = null,
-        ?bool $isFinished = null,
+        Board $board,
+        PlayerId $currentPlayer,
+        bool $isFinished,
+        \DateTimeImmutable $createdAt,
+        \DateTimeImmutable $updatedAt,
         ?PlayerId $winner = null,
-        ?\DateTimeImmutable $createdAt = null,
-        ?\DateTimeImmutable $updatedAt = null,
     ) {
-        $this->board = $board ?? Board::createEmpty();
-        $this->currentPlayer = $currentPlayer ?? PlayerId::PLAYER_ONE;
-        $this->isFinished = $isFinished ?? false;
+        $this->board = $board;
+        $this->currentPlayer = $currentPlayer;
+        $this->isFinished = $isFinished;
+        $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
         $this->winner = $winner;
-        $this->createdAt = $createdAt ?? new \DateTimeImmutable();
-        $this->updatedAt = $updatedAt ?? new \DateTimeImmutable();
     }
 
     public static function create(GameId $id): self
     {
-        return new self($id);
+        return new self(
+            id: $id,
+            board: Board::createEmpty(),
+            currentPlayer: PlayerId::PLAYER_ONE,
+            isFinished: false,
+            createdAt: new \DateTimeImmutable(),
+            updatedAt: new \DateTimeImmutable()
+        );
     }
 
     public static function fromEntity(GameEntity $entity): self
     {
         return new self(
             id: GameId::fromString($entity->getId()),
-            board: Board::create($entity->getBoard()),
+            board: Board::deserialize($entity->getBoard()),
             currentPlayer: PlayerId::from($entity->getCurrentPlayer()),
             isFinished: $entity->isFinished(),
-            winner: null !== $entity->getWinner() ? PlayerId::from($entity->getWinner()) : null,
             createdAt: $entity->getCreatedAt(),
-            updatedAt: $entity->getUpdatedAt()
+            updatedAt: $entity->getUpdatedAt(),
+            winner: null !== $entity->getWinner() ? PlayerId::from($entity->getWinner()) : null,
         );
     }
 
@@ -83,15 +91,15 @@ class Game
     private function validateMove(PlayerId $playerId, Position $position): void
     {
         if ($this->isFinished) {
-            throw new \DomainException('Game is already finished');
+            throw new DomainException('Game is already finished');
         }
 
         if ($this->currentPlayer !== $playerId) {
-            throw new \DomainException('It is not your turn');
+            throw new DomainException('It is not your turn');
         }
 
         if (!$this->board->isPositionEmpty($position)) {
-            throw new \DomainException('Position is already occupied');
+            throw new DomainException('Position is already occupied');
         }
     }
 

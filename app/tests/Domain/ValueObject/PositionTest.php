@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Domain\ValueObject;
 
+use App\Domain\Exception\DomainException;
 use App\Domain\ValueObject\Position;
 use PHPUnit\Framework\TestCase;
 
@@ -25,7 +26,7 @@ class PositionTest extends TestCase
      */
     public function testThrowsExceptionForInvalidPosition(int $row, int $col): void
     {
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Position must be between 0 and 2');
 
         Position::create($row, $col);
@@ -41,7 +42,7 @@ class PositionTest extends TestCase
 
     public function testThrowsExceptionForInvalidIndex(): void
     {
-        $this->expectException(\DomainException::class);
+        $this->expectException(DomainException::class);
         $this->expectExceptionMessage('Index must be between 0 and 8');
 
         Position::fromIndex(9);
